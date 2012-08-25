@@ -1,11 +1,11 @@
 var Canvas = require('canvas');
 var falafel = require('falafel');
 
-module.exports = function (src, colors, opts) {
-    if (!colors) colors = {};
+module.exports = function (src, opts) {
     if (!opts) opts = {};
     if (!opts.height) opts.height = 12;
     if (!opts.width) opts.width = 6;
+    if (!opts.colors) opts.colors = {};
     
     var lines = src.split('\n');
     var height = lines.length * opts.height;
@@ -19,9 +19,9 @@ module.exports = function (src, colors, opts) {
     var rects = [];
     
     falafel(src, { loc : true }, function (node) {
-        var color = typeof colors === 'function'
-            ? colors(node)
-            : colors[node.type];
+        var color = typeof opts.colors === 'function'
+            ? opts.colors(node)
+            : opts.colors[node.type];
         ;
         if (!color) return;
         

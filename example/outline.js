@@ -1,4 +1,4 @@
-var collage = require('../');
+var art = require('../');
 var fs = require('fs');
 
 var src = fs.readFileSync(__dirname + '/../index.js', 'utf8');
@@ -11,4 +11,4 @@ var colors = {
     Program : 'rgb(240,40,40)'
 };
 
-collage(src, colors, { height : 4, width: 2 }) .pipe(ws);
+art(src, { colors : colors, height : 4, width: 2 }) .pipe(ws);
