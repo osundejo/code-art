@@ -3,7 +3,7 @@ var falafel = require('falafel');
 
 module.exports = function (src, colors) {
     if (!colors) colors = {};
-    if (!colors.default) colors.default = 'rgb(55,63,140)';
+    if (!colors.Program) colors.Program = 'rgb(60,60,60)';
     
     var lines = src.split('\n');
     var height = lines.length * 12;
@@ -15,18 +15,45 @@ module.exports = function (src, colors) {
     var ctx = canvas.getContext('2d');
     ctx.fillStyle = colors.default;
     
-    lines.forEach(function (line, ix) {
-        fillChunks(ix);
+    var rects = [];
+    
+    falafel(src, { loc : true }, function (node) {
+        var color = colors[node.type];
+        if (!color) return;
+        
+        if (Array.isArray(color)) {
+            var ix = 0;
+            for (var p = node.parent; p; p = p.parent) {
+                if (p.type === node.type) ix ++;
+            }
+            color = color[ix % color.length];
+        }
+        
+        var start = node.loc.start;
+        var end = node.loc.end;
+        
+        for (var i = start.line; i <= end.line; i++) {
+            var s = i === start.line ? start.column : 0;
+            var e = i === end.line ? end.column : undefined;
+            rects.unshift({
+                color : color,
+                index : i - 1,
+                start : s,
+                end : e
+            });
+        }
     });
     
-    function fillChunks (ix, start, end) {
-        var line = lines[ix];
-        var chunks = line.split(/(\s{2,})/).filter(Boolean);
-        var y = ix * 12;
+    rects.forEach(function (r) {
+        ctx.fillStyle = r.color;
         
-        var col = start || 0;
+        var line = lines[r.index];
+        var chunks = line.split(/(\s{2,})/).filter(Boolean);
+        var y = r.index * 12;
+        
+        var col = r.start;
         chunks.forEach(function (c) {
-            if (end !== undefined && col + c.length > end) return;
+            if (r.end !== undefined && col + c.length > r.end) return;
             
             if (!/\s{2,}/.test(c)) {
                 var x = col * 6;
@@ -35,30 +62,6 @@ module.exports = function (src, colors) {
             }
             col += c.length;
         });
-    }
-    
-    falafel(src, { loc : true }, function (node) {
-        if (colors[node.type]) {
-            ctx.fillStyle = colors[node.type];
-            
-            var start = node.loc.start;
-            var end = node.loc.end;
-            
-            for (var i = start.line; i <= end.line; i++) {
-                if (i === start.line && i === end.line) {
-                    fillChunks(i - 1, start.column, end.column);
-                }
-                else if (i === start.line) {
-                    fillChunks(i - 1, start.column);
-                }
-                else if (i === end.line) {
-                    fillChunks(i - 1, 0, end.column);
-                }
-                else {
-                    fillChunks(i - 1);
-                }
-            }
-        }
     });
     
     return canvas.createPNGStream();

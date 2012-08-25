@@ -4,5 +4,5 @@ var fs = require('fs');
 var src = fs.readFileSync(__dirname + '/../index.js', 'utf8');
 var ws = fs.createWriteStream(__dirname + '/out.png');
 collage(src, {
-    FunctionExpression : 'rgb(170,40,30)'
+    FunctionExpression : [ 'red', 'yellow', 'green', 'blue' ]
 }).pipe(ws);
