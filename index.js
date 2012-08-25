@@ -1,24 +1,28 @@
 var Canvas = require('canvas');
 var falafel = require('falafel');
 
-module.exports = function (src, colors) {
+module.exports = function (src, colors, opts) {
     if (!colors) colors = {};
-    if (!colors.Program) colors.Program = 'rgb(60,60,60)';
+    if (!opts) opts = {};
+    if (!opts.height) opts.height = 12;
+    if (!opts.width) opts.width = 6;
     
     var lines = src.split('\n');
-    var height = lines.length * 12;
+    var height = lines.length * opts.height;
     var width = Math.max.apply(null, lines.map(function (line) {
         return line.length;
-    })) * 6;
+    })) * opts.width;
     
     var canvas = new Canvas(width, height);
     var ctx = canvas.getContext('2d');
-    ctx.fillStyle = colors.default;
     
     var rects = [];
     
     falafel(src, { loc : true }, function (node) {
-        var color = colors[node.type];
+        var color = typeof colors === 'function'
+            ? colors(node)
+            : colors[node.type];
+        ;
         if (!color) return;
         
         if (Array.isArray(color)) {
@@ -49,16 +53,16 @@ module.exports = function (src, colors) {
         
         var line = lines[r.index];
         var chunks = line.split(/(\s{2,})/).filter(Boolean);
-        var y = r.index * 12;
+        var y = r.index * opts.height;
         
         var col = r.start;
         chunks.forEach(function (c) {
             if (r.end !== undefined && col + c.length > r.end) return;
             
             if (!/\s{2,}/.test(c)) {
-                var x = col * 6;
-                var w = c.length * 6;
-                ctx.fillRect(x, y, w, 12);
+                var x = col * opts.width;
+                var w = c.length * opts.width;
+                ctx.fillRect(x, y, w, opts.height);
             }
             col += c.length;
         });
