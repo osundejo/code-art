@@ -12,8 +12,9 @@ module.exports = function (src, opts) {
     var width = Math.max.apply(null, lines.map(function (line) {
         return line.length;
     })) * opts.width;
+    var left = opts.left || 0;
     
-    var canvas = new Canvas(width, height);
+    var canvas = new Canvas(left + width, height);
     var ctx = canvas.getContext('2d');
     
     var rects = [];
@@ -60,7 +61,7 @@ module.exports = function (src, opts) {
             if (r.end !== undefined && col + c.length > r.end) return;
             
             if (!/\s{2,}/.test(c)) {
-                var x = col * opts.width;
+                var x = left + col * opts.width;
                 var w = c.length * opts.width;
                 ctx.fillRect(x, y, w, opts.height);
             }
