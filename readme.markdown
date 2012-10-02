@@ -43,6 +43,9 @@ share the same node type, modulo the length of the array.
 
 `opts.height` is the height to use for each character, default 12.
 
+If `src` is an Array, render each source item from left to right with
+`opts.padding` of separation.
+
 # install
 
 With [npm](http://npmjs.org) do:
