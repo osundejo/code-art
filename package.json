@@ -1,6 +1,6 @@
 {
     "name" : "code-art",
-    "version" : "0.0.0",
+    "version" : "0.1.0",
     "description" : "create blocky modern art from code",
     "main" : "index.js",
     "directories" : {

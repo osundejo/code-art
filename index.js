@@ -7,12 +7,13 @@ module.exports = function art (src, opts) {
     if (!opts.width) opts.width = 6;
     if (!opts.colors) opts.colors = {};
     if (!opts.left) opts.left = 0;
+    if (!opts.padding) opts.padding = 50;
     
     if (Array.isArray(src)) {
         var size = src.slice(1).reduce(function (acc, s) {
             var size = imageSize(s, opts);
             return {
-                width : acc.width + size.width + 50,
+                width : acc.width + size.width + opts.padding,
                 height : Math.max(acc.height, size.height),
             };
         }, imageSize(src[0], opts));
@@ -25,7 +26,7 @@ module.exports = function art (src, opts) {
             draw(canvas, s, opts);
             
             var size = imageSize(s, opts);
-            left += size.width + 50;
+            left += size.width + opts.padding;
         });
         
         return canvas.createPNGStream();
