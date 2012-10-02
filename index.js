@@ -1,21 +1,57 @@
 var Canvas = require('canvas');
 var falafel = require('falafel');
 
-module.exports = function (src, opts) {
+module.exports = function art (src, opts) {
     if (!opts) opts = {};
     if (!opts.height) opts.height = 12;
     if (!opts.width) opts.width = 6;
     if (!opts.colors) opts.colors = {};
+    if (!opts.left) opts.left = 0;
     
+    if (Array.isArray(src)) {
+        var size = src.slice(1).reduce(function (acc, s) {
+            var size = imageSize(s, opts);
+            return {
+                width : acc.width + size.width + 50,
+                height : Math.max(acc.height, size.height),
+            };
+        }, imageSize(src[0], opts));
+        
+        var canvas = new Canvas(size.width, size.height);
+        
+        var left = 0;
+        src.forEach(function (s) {
+            opts.left = left;
+            draw(canvas, s, opts);
+            
+            var size = imageSize(s, opts);
+            left += size.width + 50;
+        });
+        
+        return canvas.createPNGStream();
+    }
+    else {
+        var size = imageSize(src, opts);
+        var canvas = new Canvas(size.width, size.height);
+        draw(canvas, src, opts)
+        return canvas.createPNGStream();
+    }
+};
+
+function imageSize (src, opts) {
     var lines = src.split('\n');
-    var height = lines.length * opts.height;
-    var width = Math.max.apply(null, lines.map(function (line) {
-        return line.length;
-    })) * opts.width;
-    var left = opts.left || 0;
     
-    var canvas = new Canvas(left + width, height);
+    return {
+        height : lines.length * opts.height,
+        width : Math.max.apply(null, lines.map(function (line) {
+            return line.length;
+        })) * opts.width,
+    };
+}
+    
+function draw (canvas, src, opts) {
     var ctx = canvas.getContext('2d');
+    var lines = src.split('\n');
     
     var rects = [];
     
@@ -61,13 +97,11 @@ module.exports = function (src, opts) {
             if (r.end !== undefined && col + c.length > r.end) return;
             
             if (!/\s{2,}/.test(c)) {
-                var x = left + col * opts.width;
+                var x = opts.left + col * opts.width;
                 var w = c.length * opts.width;
                 ctx.fillRect(x, y, w, opts.height);
             }
             col += c.length;
         });
     });
-    
-    return canvas.createPNGStream();
 };
